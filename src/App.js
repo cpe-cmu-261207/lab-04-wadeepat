@@ -1,30 +1,68 @@
 import { useState } from "react";
-import { CourseCard } from "./components/CourseCard";
+import {CourseCard} from "./components/CourseCard";
+
 function App() {
   const grade = ["A", "B+", "B", "C+", "C", "D+", "D", "F", "W"];
   const credit = [1, 2, 3];
 
   const [myCourses, setMyCourse] = useState([]);
-  const [inputData, setInputData] = useState({});
+  const [inputData, setInputData] = useState({name:"",grd:"A",crd:"1"});
   const [GPA, setGPA] = useState(4.0);
-  var s=[];
-  var c=[];
-  var u=[];
-  var g=[];
-  var n=0;
-  var value;
+
   /**
    * Calculate the GPA of current courses
    * @returns the GPA of current courses
    */
-  function calculateGPA() {
+  function calculateGPA(cc) {
     // TODO
-    var num=0,unitAll=0;
-    for(var i=0;i<n;i++){
-      num += g[i]*u[i];
-      unitAll+=u[i];
-    }
-    alert((num/unitAll).toFixed(2));
+    var r_gpa = 0
+    var r_cre  = 0 
+    var cal_gpa = 0
+    cc.forEach((item) => {
+      switch(item.grd){
+        case 'A' :
+          r_gpa = 4
+          r_cre += Number(item.crd) 
+          cal_gpa += r_gpa * Number(item.crd)
+          break
+        case 'B+' :
+          r_gpa = 3.5
+          r_cre += Number(item.crd)
+          cal_gpa += r_gpa * Number(item.crd)
+          break
+        case 'B' :
+          r_gpa = 3
+          r_cre += Number(item.crd)
+          cal_gpa += r_gpa * Number(item.crd)
+          break
+        case 'C+' :
+          r_gpa = 2.5
+          r_cre += Number(item.crd)
+          cal_gpa += r_gpa * Number(item.crd)
+          break
+        case 'C' :
+          r_gpa = 2
+          r_cre += Number(item.crd)
+          cal_gpa += r_gpa * Number(item.crd)
+          break
+        case 'D+' :
+          r_gpa = 1.5
+          r_cre += Number(item.crd)
+          cal_gpa += r_gpa * Number(item.crd)
+          break
+        case 'D' :
+          r_gpa = 1
+          r_cre += Number(item.crd)
+          cal_gpa += r_gpa * Number(item.crd)
+          break
+        case 'F' :
+          r_gpa = 0
+          r_cre += Number(item.crd)
+          cal_gpa += r_gpa * Number(item.crd)
+          break
+      }  
+    });
+    setGPA(cal_gpa / r_cre) 
   }
 
   /**
@@ -35,25 +73,12 @@ function App() {
   function addCourse(event) {
     event.preventDefault();
     // TODO
-    s[n]=document.querySelector('#subject').value;
-    c[n]=document.querySelector('#code').value;
-    u[n]=document.querySelector('#unit').value;
-    switch(document.querySelector('#grade').value){
-      case "A": g[n] =4; break;
-      case "B+":g[n] =3.5; break;
-      case "B": g[n] =3; break;
-      case "C+":g[n] =2.5; break;
-      case "C": g[n] =2; break;
-      case "D+":g[n] =1.5; break;
-      case "D": g[n] =1; break;
-      case "F": g[n] =0; break;
-      case "W": g[n] =0; break;
-    }
-    var test = document.querySelector('#course');
-    test.append(<CourseCard subject={s[n]} code={c[n]} unit={u[n]} grade={g[n]} />);
-    n++;
+    console.log(inputData.name)
+    const course = [...myCourses,inputData]
+    setMyCourse(course)
     // recalculate GPA
-    calculateGPA();
+    calculateGPA(course);
+    document.querySelector('#subject').value="";
   }
 
   /**
@@ -63,6 +88,11 @@ function App() {
    */
   function onDeleteCourse(id) {
     // TODO
+    const course = myCourses.filter(item => {
+      return item.name !== id
+    })
+    setMyCourse(course)
+    calculateGPA(course)
   }
 
   return (
@@ -73,35 +103,37 @@ function App() {
       <div className="h-2/3 md:w-2/4 p-3 rounded-lg mx-auto overflow-auto">
         <h1 className="text-2xl my-3">My courses</h1>
         {/* TODO display courses */}
-        <div id ="course">
-
-        </div>
+        {myCourses.map(item => {
+          return <CourseCard name ={item.name} grd = {item.grd} crd ={item.crd} del={onDeleteCourse} />
+        })}
+        
+        <form onSubmit ={
+          e => addCourse(e)}>
+          <input type="text" id="subject" onChange = { e => 
+            setInputData({...inputData,name: e.currentTarget.value}) 
+          }/>
+          <select onChange = { e => 
+            setInputData({...inputData,crd: e.currentTarget.value}) 
+          }>
+          {credit.map(item => {
+            return <option value={item}>{item}</option>
+          })}
+          </select>     
+          <select onChange = { e => 
+            setInputData({...inputData,grd: e.currentTarget.value}) 
+            }>
+            {grade.map(item => {
+              return <option value={item}>{item}</option>
+            })}
+          </select>    
+            <button id="add" type="submit">ADD</button>
+       </form>
       </div>
       {/* TODO add course input form */}
-      <div>
-        <form onSubmit={(e) =>addCourse(e)}>
-            <label>subject</label>
-            <input type="text" id="subject"></input>
-            <label>code</label>
-            <input type="text" id="code"></input>
-            <label>credit</label>
-            <input type="text" id="unit"></input>
-            <label>grade</label>
-            <select id="grade">
-              <option value="A">A</option>
-              <option value="B+">B+</option>
-              <option value="B">B</option>
-              <option value="C+">C+</option>
-              <option value="C">C</option>
-              <option value="D+">D+</option>
-              <option value="D">D</option>
-              <option value="F">F</option>
-              <option value="W">W</option>
-            </select>
-            <button type="submit">+</button>
-        </form>
-      </div>
       {/* TODO display calculated GPA */}
+      <div id="gpafield"className="h-1/10 md:w-2/3 p-3 rounded-lg mx-auto overflow-auto">
+        {GPA.toFixed(2)}
+      </div>
     </div>
   );
 }
